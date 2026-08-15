@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Reel Intervention</title>
+    <!-- Modern, punchy font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212; /* Dark mode background */
+            --text-main: #ffffff; 
+            --accent-pink: #FE2C55; /* TikTok Pink */
+            --pink-shadow: #b81b3b;
+            --accent-cyan: #25F4EE; /* TikTok Cyan */
+            --cyan-shadow: #19b2ad;
+            --gray-text: #8e8e93;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background-image: radial-gradient(circle at top right, rgba(254, 44, 85, 0.1), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(37, 244, 238, 0.1), transparent 40%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.4s ease-out;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            height: 100%;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(45deg, var(--accent-pink), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            letter-spacing: -1px;
+            font-weight: 800;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            line-height: 1.3;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: var(--text-main);
+            opacity: 0.8;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .subtext {
+            font-size: 1rem;
+            color: var(--gray-text);
+            margin-top: 15px;
+            font-weight: 400;
+        }
+
+        .pink-text { color: var(--accent-pink); }
+        .cyan-text { color: var(--accent-cyan); }
+        .italic { font-style: italic; }
+
+        /* Progress Dots */
+        .progress-wrapper {
+            position: absolute;
+            top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .progress-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--text-main);
+            opacity: 0.5;
+            text-transform: uppercase;
+        }
+
+        .progress-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: transparent;
+            border: 2px solid var(--gray-text);
+            opacity: 0.4;
+        }
+
+        .dot.active {
+            background-color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            width: 20px;
+            border-radius: 10px;
+            opacity: 1;
+            box-shadow: 0 0 10px rgba(37, 244, 238, 0.5);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            position: relative;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border-radius: 12px; /* More modern shape */
+            cursor: pointer;
+            border: none;
+            transition: transform 0.1s;
+            min-width: 140px;
+        }
+
+        button:active {
+            transform: translateY(4px) !important;
+            box-shadow: none !important;
+        }
+
+        .btn-pink {
+            background-color: var(--accent-pink);
+            color: white;
+            box-shadow: 0 6px 0 var(--pink-shadow);
+        }
+
+        .btn-cyan {
+            background-color: var(--bg-color);
+            color: var(--accent-cyan);
+            border: 2px solid var(--accent-cyan);
+            box-shadow: 0 6px 0 var(--cyan-shadow);
+        }
+        
+        .evasive-btn {
+            transition: transform 0.05s linear; 
+        }
+
+        /* Slider Styles */
+        .slider-container {
+            margin: 40px 0;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .slider-label {
+            font-weight: 800;
+            margin: 10px 0;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 200px;
+            background: transparent;
+            transform: rotate(-90deg);
+            margin: 100px 0;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 25px;
+            cursor: pointer;
+            background: #2a2a2a;
+            border-radius: 20px;
+            border: 2px solid #444;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -14px;
+            border: 3px solid var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(37, 244, 238, 0.4);
+            /* Rotated the emoji 90deg internally to counteract the slider's -90deg rotation */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text x="12" y="16" font-size="16" text-anchor="middle" transform="rotate(90 12 12)">🤡</text></svg>');
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Glitchy/Floating Elements */
+        .float-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.2;
+            animation: float 3s infinite ease-in-out;
+            z-index: -1; 
+            pointer-events: none; 
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        .footer-logo {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.75rem;
+            color: var(--gray-text);
+            font-weight: 600;
+            z-index: 1;
+            width: 100%;
+            text-align: center;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- SCREEN 1: Home -->
+        <div id="screen1" class="screen active">
+            <div class="float-icon" style="left: 10%; top: 20%;">📱</div>
+            <div class="float-icon" style="right: 15%; bottom: 25%;">😵‍💫</div>
+            <h1>The Reel<br>Intervention</h1>
+            <div class="subtitle">YOUR DMS ARE OUT OF CONTROL</div>
+            <h2>Do you realize you've sent me 69 reels today?</h2>
+            <button class="btn-pink" onclick="nextScreen(2)" style="margin-top: 20px;">I can explain →</button>
+        </div>
+
+        <!-- SCREEN 2: Question 1 -->
+        <div id="screen2" class="screen">
+            <div class="progress-wrapper">
+                <div class="progress-title">BE HONEST</div>
+                <div class="progress-dots">
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+            <div class="float-icon" style="right: 15%; top: 25%;">🧠</div>
+            <div class="float-icon" style="left: 15%; bottom: 35%;">💨</div>
+            <h2>First of all... do you even remember what <span class="cyan-text italic">half</span> of them were about?</h2>
+            <div class="btn-group">
+                <button class="btn-cyan evasive-btn">Of course!</button>
+                <button class="btn-pink" onclick="nextScreen(3)">Literally no idea</button>
+            </div>
+            <div class="subtext">(don't lie to me)</div>
+        </div>
+
+        <!-- SCREEN 3: You're right -->
+        <div id="screen3" class="screen">
+            <div class="progress-wrapper">
+                <div class="progress-title">EXPOSED</div>
+                <div class="progress-dots">
+                    <div class="dot"></div>
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+            <div style="font-size: 3.5rem; margin-bottom: 0px;">📉</div>
+            <h2>Wow, shocker.<br>You're just hitting "Share" on autopilot.</h2>
+            <div class="subtext" style="margin-bottom: 30px;">It's a scroll-induced reflex at this point.</div>
+            <button class="btn-pink" onclick="nextScreen(4)">I am unwell 🚩</button>
+        </div>
+
+        <!-- SCREEN 4: The Slider -->
+        <div id="screen4" class="screen">
+            <div class="progress-wrapper">
+                <div class="progress-title">REALITY CHECK</div>
+                <div class="progress-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+            <h2>On a scale of 1 to 100...</h2>
+            <div class="subtext">How many of those Reels do you think I <span class="pink-text italic">actually</span> watched?</div>
+            
+            <div class="slider-container">
+                <div class="slider-label cyan-text">ALL OF THEM 🍿</div>
+                <input type="range" min="0" max="100" value="0" id="watch-slider">
+                <div class="slider-label" style="margin-top: -10px;">ABSOLUTELY ZERO 💀</div>
+            </div>
+
+            <div id="oops-text" class="subtext pink-text hidden">Oops... looks like the answer is 0. 🤭</div>
+            <button id="ding-btn" class="btn-pink hidden" onclick="nextScreen(5)" style="margin-top: 15px;">Accept the truth 🔔</button>
+        </div>
+
+        <!-- SCREEN 5: Stop Sending -->
+        <div id="screen5" class="screen">
+            <div class="progress-wrapper">
+                <div class="progress-title">THE ULTIMATUM</div>
+                <div class="progress-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+            <div class="float-icon" style="left: 15%; bottom: 20%;">🗑️</div>
+            <div class="float-icon" style="right: 20%; top: 30%;">🛑</div>
+            <h2>Will you please stop treating our DMs like a dump for your 3 AM scrolling sessions?</h2>
+            
+            <div class="btn-group">
+                <button class="btn-pink" onclick="nextScreen(6)">I'll stop.</button>
+                <button class="btn-cyan evasive-btn">Never.</button>
+            </div>
+            <div class="subtext">(choose wisely)</div>
+        </div>
+
+        <!-- SCREEN 6: Thank God -->
+        <div id="screen6" class="screen">
+            <div class="progress-wrapper">
+                <div class="progress-title">PEACE</div>
+                <div class="progress-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot active"></div>
+                </div>
+            </div>
+            
+            <h1 style="font-size: 3.5rem;">FINALLY.</h1>
+            <h2 style="margin: 10px 0 20px 0;">🌿🌱🌳</h2>
+            <div class="subtext" style="font-size: 1.1rem; color: var(--text-main);">Glad we had this talk. Now please, go touch some grass. ✨</div>
+            
+            <div class="btn-group">
+                <button class="btn-cyan" onclick="shareLink('https://reel-intervention.vercel.app/', this)">Call out a friend 💌</button>
+                <button class="btn-pink" onclick="nextScreen(1)">Replay 🔄</button>
+            </div>
+            <div class="subtext" style="font-size: 0.8rem; margin-top: 20px;">Send this link to the person whose DMs are just a wall of Reels.</div>
+        </div>
+        
+        <div class="footer-logo">
+            the reel intervention · built for peace of mind<br>
+            for the chronic scrollers by A7_ScAry
+        </div>
+    </div>
+
+    <script>
+        // Screen Navigation Logic
+        function nextScreen(screenNumber) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            // Show target screen
+            document.getElementById('screen' + screenNumber).classList.add('active');
+
+            // Reset logic if going back to start
+            if (screenNumber === 1) {
+                document.getElementById('watch-slider').value = 0;
+                document.getElementById('oops-text').classList.add('hidden');
+                document.getElementById('ding-btn').classList.add('hidden');
+                document.querySelectorAll('.evasive-btn').forEach(btn => {
+                    btn.style.transform = `translate(0px, 0px)`;
+                });
+            }
+
+            // Trigger Confetti Celebration on last screen
+            if (screenNumber === 6) {
+                fireConfetti();
+            }
+        }
+
+        // Sharing Logic
+        function shareLink(url, btnElement) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'The Reel Intervention',
+                    text: 'A quick quiz for chronic scrollers.',
+                    url: url
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    const originalText = btnElement.innerHTML;
+                    btnElement.innerHTML = 'Link Copied! ✅';
+                    setTimeout(() => {
+                        btnElement.innerHTML = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    alert("Here is the link: " + url);
+                });
+            }
+        }
+
+        // Slider Slipping Logic
+        const slider = document.getElementById('watch-slider');
+        const oopsText = document.getElementById('oops-text');
+        const dingBtn = document.getElementById('ding-btn');
+
+        slider.addEventListener('input', (e) => {
+            if (parseInt(e.target.value) > 5) {
+                setTimeout(() => {
+                    e.target.value = 0; 
+                    oopsText.classList.remove('hidden');
+                    dingBtn.classList.remove('hidden');
+                }, 150); 
+            }
+        });
+
+        // Evasive Button Logic
+        const evasiveButtons = document.querySelectorAll('.evasive-btn');
+        
+        evasiveButtons.forEach(btn => {
+            ['mouseenter', 'touchstart'].forEach(evt => 
+                btn.addEventListener(evt, function(e) {
+                    if(evt === 'touchstart') e.preventDefault();
+                    
+                    const jumpX = (Math.random() - 0.5) * 350; 
+                    const jumpY = (Math.random() - 0.5) * 250; 
+                    
+                    this.style.transform = `translate(${jumpX}px, ${jumpY}px)`;
+                })
+            );
+        });
+
+        // Confetti Function for Screen 6 (TikTok Colors)
+        function fireConfetti() {
+            var duration = 3000; 
+            var end = Date.now() + duration;
+
+            (function frame() {
+                // Shoot from left edge
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#FE2C55', '#25F4EE', '#ffffff']
+                });
+                // Shoot from right edge
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#FE2C55', '#25F4EE', '#ffffff']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    </script>
+</body>
+</html>
